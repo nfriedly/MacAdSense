@@ -1,0 +1,41 @@
+<html>
+<head>
+<title>MacAdSense Widget</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<link href="MacAdSense.css" rel="stylesheet" type="text/css">
+
+<script type='text/javascript' src='file:///System/Library/WidgetResources/AppleClasses/AppleInfoButton.js' charset='utf-8'/>
+<script type='text/javascript' src='file:///System/Library/WidgetResources/AppleClasses/AppleAnimator.js' charset='utf-8'/>
+<script type='text/javascript' src='file:///System/Library/WidgetResources/AppleClasses/AppleButton.js' charset='utf-8'/>
+<script type='text/javascript' src='MacAdSense.js' charset='utf-8'/>
+
+</head>
+
+<body onload="setup();">
+<div id="front">
+	<div id="front_content">
+		<div id="top">
+		<span id="earnings"></span>
+		</div>
+		<div id="bottom">
+		<b>Updated</b>: <span id="updated"></span><br>
+		<b>Clicks</b>: <span id="clicks"></span><br>
+		<b>eCPM</b>: <span id="ecpm"></span><br>
+		<b>Extrapolated</b>: <span id="extrapolated"></span>
+		</div>
+	</div>
+	<div id="dialog"><div id="dialog_content"></div></div>
+	<div id="i"></div>
+</div>
+<div id="back">
+	<div id="back_content">
+	<form id="ff" onSubmit="hideBack(); return false;">
+	<b>Username</b>:<br><input type="text" name="username"><br>
+	<b>Password</b>:<br><input type="password" name="password">
+	</div>
+	<div id="version"></div>
+	<div id="done"></div>
+</div>
+
+</body>
+</html>
