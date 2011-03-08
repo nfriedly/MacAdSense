@@ -38,7 +38,8 @@ function showBack()
     back.style.display="block";
 
     if (window.widget)
-        setTimeout ('widget.performTransition();', 0);  
+        setTimeout ('widget.performTransition();', 0);
+    
 
 }
 
@@ -49,26 +50,46 @@ function hideBack()
 
     if (window.widget)
     {
-	var form=document.getElementById("ff");
-
-	if(form.username.value!="" && form.password.value!="")
-	{
-		widget.setPreferenceForKey(form.username.value, "username");
-
-		now=0;
-		showDialog("Saving to keychain...");
-		var command=widget.system("./MacAdSense.php setcredentials", onshow);
-		command.write(form.username.value+"\n");
-		command.write(form.password.value+"\n");
-		command.close();
-
-		form.password.value="";
-	}
+		var form=document.getElementById("ff");
+		
+	
+		if(form.username.value!="" && form.password.value!="" )
+		{
+			widget.setPreferenceForKey(form.username.value, "username");
+			
+			
+			widget.setPreferenceForKey(form.timeframe.value, "timeframe");
+			document.getElementById('big_timeframe').innerHTML = widget.preferenceForKey("timeframe");
+	
+	
+			now=0;
+			showDialog("Saving to keychain...");
+			var command=widget.system("./MacAdSense.php setcredentials", onshow);
+			command.write(form.username.value+"\n");
+			command.write(form.password.value+"\n");
+			command.close();
+	
+			form.password.value="";
+			
+		}
+		
+		if(widget.preferenceForKey("timeframe") != form.timeframe.value){
+		
+			showDialog("Loading...");
+			
+			widget.setPreferenceForKey(form.timeframe.value, "timeframe");
+			document.getElementById('big_timeframe').innerHTML = widget.preferenceForKey("timeframe");
+		
+		}
+		
+		fetchData();
+	
     }
 
 
     if (window.widget)
         widget.prepareForTransition("ToFront");
+        
 
     back.style.display="none";
     front.style.display="block";
@@ -76,6 +97,7 @@ function hideBack()
     if (window.widget)
     {
         setTimeout ('widget.performTransition();', 0);
+        
     }
 }
 
@@ -98,23 +120,29 @@ function endHandler()
 
 function fetchData()
 {
-	var command=widget.system("./MacAdSense.php getdata", displayData);
-	command.write(widget.preferenceForKey("username")+"\n");
+	var command=widget.system("./MacAdSense.php getdata " + 
+		widget.preferenceForKey("username") + " " + 
+		widget.preferenceForKey("timeframe"), displayData);
 	command.close();
 }
 
 function displayData(data)
 {
-	output=data.outputString.split("#");
+	//output=data.outputString.split("#");
+	
+	output = JSON.parse(data.outputString);
 
 	// do we get real data
-	if(output[1]!=0) 
+	//if(output[1]!=0)
+	if(output.time)
 	{
-		document.getElementById("updated").innerHTML=output[0];
-		document.getElementById("extrapolated").innerHTML="$"+output[1];
-		document.getElementById("clicks").innerHTML=output[3];
-		document.getElementById("earnings").innerHTML="$"+output[2];
-		document.getElementById("ecpm").innerHTML=output[5];
+	
+		document.getElementById("updated").innerHTML=output.time; // 0
+		document.getElementById("timeframe").innerHTML=output.input.timeframe; //1
+		//document.getElementById("extrapolated").innerHTML="$"+output[1];
+		document.getElementById("clicks").innerHTML=output.clicks; //3
+		document.getElementById("earnings").innerHTML="$"+output.usd; // 2
+		document.getElementById("ecpm").innerHTML="$"+output.ecpm; //5
 
 		now = Math.round(new Date().getTime()/1000);
 
@@ -142,9 +170,11 @@ function onshow()
 		}
 		else
 		{
-        		showDialog("Loading...");
+        	showDialog("Loading...");
 
 			setTimeout('fetchData()',100);
+			
+			document.getElementById('big_timeframe').innerHTML = widget.preferenceForKey("timeframe");
 		}
 	}
 	else
@@ -166,13 +196,26 @@ function setup()
 
 		var form=document.getElementById("ff");
 		form.username.value=widget.preferenceForKey("username");
+		
+		// selecte the appropriate timeframe
+		for(var ops = form.timeframe.options, i=0; i< ops.length; i++){
+			if(ops[i].value == widget.preferenceForKey("timeframe")){
+				ops.selectedIndex = i;
+			}
+		}
+		
 	}
 	var done_button = new AppleGlassButton(document.getElementById("done"), "Done", hideBack);
 	i_button = new AppleInfoButton(document.getElementById("i"), document.getElementById("front"), "white", "white", showBack);
 	document.getElementById("version").innerHTML=version;
-
+	
 	var dialog = document.getElementById("dialog");
 	var dialog_content = document.getElementById("dialog_content");
 	var front_content = document.getElementById("front_content");
+	
+	document.getElementById("front_content").onclick = function(){
+	        showDialog("Loading...");
+			setTimeout('fetchData()',100);
+	};
 
 }

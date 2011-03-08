@@ -13,15 +13,16 @@
 
 <body onload="setup();">
 <div id="front">
+	<div id="big_timeframe"></div>
 	<div id="front_content">
 		<div id="top">
 		<span id="earnings"></span>
 		</div>
 		<div id="bottom">
+		<b>Timeframe</b>: <span id="timeframe"></span><br>
 		<b>Updated</b>: <span id="updated"></span><br>
 		<b>Clicks</b>: <span id="clicks"></span><br>
-		<b>eCPM</b>: <span id="ecpm"></span><br>
-		<b>Extrapolated</b>: <span id="extrapolated"></span>
+		<b>eCPM</b>: <span id="ecpm"></span>
 		</div>
 	</div>
 	<div id="dialog"><div id="dialog_content"></div></div>
@@ -31,7 +32,13 @@
 	<div id="back_content">
 	<form id="ff" onSubmit="hideBack(); return false;">
 	<b>Username</b>:<br><input type="text" name="username"><br>
-	<b>Password</b>:<br><input type="password" name="password">
+	<b>Password</b>:<br><input type="password" name="password"><br />
+	<select name="timeframe">
+		<option value="today">today</option>
+		<option value="yesterday">yesterday</option>
+		<option value="thismonth">this month</option>
+		<option value="lastmonth">last month</option>
+		</select>
 	</div>
 	<div id="version"></div>
 	<div id="done"></div>

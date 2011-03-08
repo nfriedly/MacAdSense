@@ -44,9 +44,16 @@ if($argv[1]=="setcredentials")
 
 }
 
-$fp = fopen("php://stdin", "r") or die("can't read stdin");
-$username = trim(fgets($fp));
-fclose($fp);
+if(isset($argv[2])) $username = $argv[2];
+else exit("Usage: getdata {username} [today|yesterday|thismonth|lastmonth]\n\n");
+
+if(isset($argv[3])) $mode = $argv[3];
+else $mode = "today";
+
+//$fp = fopen("php://stdin", "r") or die("can't read stdin");
+//$username =trim(fgets($fp));
+//$mode = trim(fgets($fp));
+//fclose($fp);
 
 $password=kc_getPassword($keychain,$username);
 
@@ -57,7 +64,7 @@ $agent="User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)";
 
 $cookie = tempnam(dirname(__FILE__), "cookie");
 
-$mode = 'thismonth'; 
+//$mode = 'today'; //thismonth
 
 $chain=array(
 "https://www.google.com/accounts/ServiceLoginBoxAuth",
@@ -115,6 +122,9 @@ foreach ($chain as $url)
 }
 curl_close($ch); 
 
+// keep a copy of the original data handy.
+$oresult = $result;
+
 // poor mans UTF-8 to Latin-1 recode (because Apple's PHP is missing iconv and recode extensions)
 $result = str_replace("\x00","",$result);
 
@@ -137,7 +147,7 @@ foreach ($result as $line) {
     {
 	$max=$a[1];
 	$clicks=$a[2];
-	$ctr=$a[3];
+	$ctr=$a[3]; // doesn't seem to work
 	$usd=$a[5];
     }
     if($a[4]!="") 
@@ -150,8 +160,25 @@ if(ereg('\..*\.',$usd))
 	$usd=preg_replace('/\./','',$usd,1);
 }
 
-// Output format: TIME # ESTIMATED EARNINGS # EARNINGS # CLICKS # CTR # ECMP
-echo @strftime("%d.%m. %H:%M")."#".round($usd*31/@date("d"))."#".$usd."#".$clicks."#".$ctr."#".$ecpm."\n"; 
+// make php happy
+date_default_timezone_set('America/New_York');
+
+$json = array(
+	"input" => array("username" => $username, "timeframe" => $mode),
+	"time" => date("h:i a"), // j, M  for day, month
+	"usd" => $usd,
+	"clicks" => $clicks,
+	"ctr" => $ctr, // doesn't seem to work
+	"ecpm" => $ecpm //,
+	//"raw" => $oresult
+);
+
+// Output format: TIME # timeframe # EARNINGS # CLICKS # CTR # ECMP
+//echo @strftime("%d.%m %H:%M")."#". $mode ."#".$usd."#".$clicks."#".$ctr."#".$ecpm."\n"; 
+
+echo json_encode($json) . "\n";
+
+//round($usd*31/@date("d")) - ESTIMATED EARNINGS
 
 unlink($cookie);
 
